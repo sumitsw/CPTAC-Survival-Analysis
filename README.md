@@ -22,6 +22,13 @@ install.packages(c("ggplot2", "survival", "survminer", "gtsummary", "broom"))
 ### 1. Load and Preprocess Data
 
 ```r
+# Load libraries
+library(ggplot2)
+library(survival)
+library(survminer)
+library(gtsummary)
+library(broom)
+
 # Load data
 data <- read.csv(file.choose(), header = TRUE)
 

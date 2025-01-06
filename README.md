@@ -38,9 +38,6 @@ data <- subset(data, !is.na(data$OS.event))
 # Create a binary expression variable based on median ACLY value
 median_tpm <- median(data$ACLY)
 data$expression <- ifelse(data$ACLY > median_tpm, "High", "Low")
-
-# Define output directory
-output_dir <- "results/CPTAC/Survival_Analysis"
 ```
 
 ### 2. Define the `generate_survival_plot` Function

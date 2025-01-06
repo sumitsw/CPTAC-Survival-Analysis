@@ -1,4 +1,4 @@
-# Survival Analysis Documentation
+# CPTAC Survival Analysis Documentation
 
 This script performs survival analysis for the ACLY gene expression data, stratified by clinical and pathological features such as gender, tumor stage, tumor grade, lymph node involvement, and metastasis. It generates Kaplan-Meier survival plots for different subgroups and saves the results as CSV files and plots.
 

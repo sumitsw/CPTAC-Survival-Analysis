@@ -164,6 +164,50 @@ filter_data <- data[data$pathologic_staging_primary_tumor_pt %in% c("pT4", "pT4a
 surv_obj <- Surv(time = filter_data$OS.time, event = filter_data$OS.event)
 fit <- survfit(surv_obj ~ expression, data = filter_data)
 generate_survival_plot(fit, filter_data, "T4")
+
+filter_data <- data[grepl("pT2", data$pathologic_staging_primary_tumor_pt), ]
+surv_obj <- Surv(time = filter_data$OS.time, event = filter_data$OS.event )
+fit <- survfit(surv_obj ~ expression, data = filter_data)
+generate_survival_plot(fit, filter_data, "T2")
+
+filter_data <- data[grepl("pT3", data$pathologic_staging_primary_tumor_pt), ]
+surv_obj <- Surv(time = filter_data$OS.time, event = filter_data$OS.event )
+fit <- survfit(surv_obj ~ expression, data = filter_data)
+generate_survival_plot(fit, filter_data, "T3")
+
+filter_data <- data[grepl("pT1", data$pathologic_staging_primary_tumor_pt), ]
+surv_obj <- Surv(time = filter_data$OS.time, event = filter_data$OS.event )
+fit <- survfit(surv_obj ~ expression, data = filter_data)
+generate_survival_plot(fit, filter_data, "T1")
+```
+### Regional Lymph Node Stage
+```r
+filter_data <- data[grepl("pN3", data$pathologic_staging_regional_lymph_nodes_pn), ]
+surv_obj <- Surv(time = filter_data$OS.time, event = filter_data$OS.event )
+fit <- survfit(surv_obj ~ expression, data = filter_data)
+generate_survival_plot(fit, filter_data, "N3")
+
+filter_data <- data[grepl("pN2", data$pathologic_staging_regional_lymph_nodes_pn), ]
+surv_obj <- Surv(time = filter_data$OS.time, event = filter_data$OS.event )
+fit <- survfit(surv_obj ~ expression, data = filter_data)
+generate_survival_plot(fit, filter_data, "N2")
+
+filter_data <- data[grepl("pN1", data$pathologic_staging_regional_lymph_nodes_pn), ]
+surv_obj <- Surv(time = filter_data$OS.time, event = filter_data$OS.event )
+fit <- survfit(surv_obj ~ expression, data = filter_data)
+generate_survival_plot(fit, filter_data, "N1")
+
+filter_data <- data[grepl("pN0", data$pathologic_staging_regional_lymph_nodes_pn), ]
+surv_obj <- Surv(time = filter_data$OS.time, event = filter_data$OS.event )
+fit <- survfit(surv_obj ~ expression, data = filter_data)
+generate_survival_plot(fit, filter_data, "N0")
+```
+### Metastasis
+```r
+filter_data <- data[grepl("cM0", data$clinical_staging_distant_metastasis_cm), ]
+surv_obj <- Surv(time = filter_data$OS.time, event = filter_data$OS.event )
+fit <- survfit(surv_obj ~ expression, data = filter_data)
+generate_survival_plot(fit, filter_data, "M0")
 ```
 
 ## Output

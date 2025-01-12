@@ -25,31 +25,6 @@ medians <- sapply(expression_cols, function(col) median(x[[col]], na.rm = TRUE))
 
 ```
 ---
-### Explanation of the Code:
-1. **Rename Columns:**
-   - Renames the first three columns for clarity to `submitter_id`, `overallsurvival`, and `deceased`.
-
-2. **Remove Unwanted Columns:**
-   - Deletes a column named `ACLY.1` if it exists in the dataframe.
-
-3. **Handle Missing Survival Data:**
-   - Converts `0` values in the `overallsurvival` column to `NA` since `0` might not be meaningful in survival analysis.
-   - Removes rows where `overallsurvival` is `NA` as they are not useful for analysis.
-
-4. **Remove Columns with Missing Values:**
-   - Eliminates any column that contains `NA` values, ensuring only complete data is retained for further analysis.
-
-5. **Drop Irrelevant Columns:**
-   - Removes the `vital_status` column, which is assumed to be unnecessary for the current analysis.
-
-6. **Identify Gene Expression Columns:**
-   - Determines which columns correspond to gene expression by excluding columns like `submitter_id`, `overallsurvival`, and `deceased`.
-
-7. **Compute Medians:**
-   - Calculates the median for each gene expression column, ignoring any `NA` values to ensure accurate statistics.
-
-8. **Store Results:**
-   - Stores the computed medians in a vector named `medians`.
 ```r
 # Iterate through each gene expression column in the dataframe
 for (col in expression_cols) {
@@ -67,36 +42,20 @@ for (col in expression_cols) {
 ```
 
 ---
+```r
+# Identify all columns related to gene expression by excluding specific metadata columns
+expression_cols <- setdiff(colnames(x), c("submitter_id", "overallsurvival", "deceased"))
 
-### Explanation of the Code:
-1. **Purpose**:
-   - This code transforms numeric gene expression columns into categorical columns ("High" or "Low") based on their median values.
-   - The original numeric values are preserved in new columns for reference.
+# Exclude columns that start with "expr_", as they are the new columns storing original values
+expression_cols <- expression_cols[!startsWith(expression_cols, "expr_")]
 
-2. **Code Details**:
-   - **`for (col in expression_cols)`**:
-     - Loops through all gene expression columns identified earlier and performs operations on each.
-   - **`paste0("expr_", col)`**:
-     - Creates a new column name by prefixing `"expr_"` to the current column name (e.g., if `col = "ACLY"`, then `new_col = "expr_ACLY"`).
-   - **`x[[new_col]] <- x[[col]]`**:
-     - Copies the original numeric values from the current column (`col`) to the newly created column (`new_col`).
-   - **`ifelse(x[[new_col]] >= medians[col], "High", "Low")`**:
-     - Compares each value in the column to the precomputed median for that column.
-     - Assigns `"High"` if the value is greater than or equal to the median; otherwise, assigns `"Low"`.
-   - **`x[[col]] <- ...`**:
-     - Overwrites the original column with the categorical values ("High"/"Low").
+# Exclude the main gene column (specified as 'gene_name'), if it is present
+# 'gene_name' is assumed to be a variable containing the name of the gene column
+expression_cols <- expression_cols[expression_cols != gene_name]
 
-3. **Why This Approach?**:
-   - By creating new columns (`expr_<original_column>`), you retain the original numeric data for further analysis if needed.
-   - The transformed categorical data makes it easier to perform downstream analyses (e.g., group comparisons, plotting).
-
----
-
-### Example:
-For a dataset with a gene expression column `ACLY`:
-- If `medians["ACLY"] = 5.0` and the original values in `ACLY` are `[4.5, 5.0, 6.2]`, the transformation will result in:
-  - New column `expr_ACLY`: `[4.5, 5.0, 6.2]`
-  - Transformed column `ACLY`: `["Low", "High", "High"]`
-
----
-
+# Further filter the expression columns by ensuring each column has more than one unique level
+# Convert each column to a factor and check if it has more than one level
+expression_cols <- expression_cols[sapply(expression_cols, function(col) {
+  length(levels(factor(x[[col]]))) > 1
+})]
+```

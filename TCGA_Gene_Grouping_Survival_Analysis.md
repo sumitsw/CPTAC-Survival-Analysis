@@ -102,3 +102,26 @@ for (col in expression_cols) {
 ```
 
 ---
+### Purpose of the Code:
+This code identifies valid gene expression columns by excluding non-expression columns, ensuring no duplicates or irrelevant columns are included, and retaining only those with more than one unique value.
+### Code with Comments:
+```r
+# Step 1: Identify potential gene expression columns by excluding specific non-expression columns
+# Exclude "submitter_id", "overallsurvival", and "deceased" as they are not gene expression data
+expression_cols <- setdiff(colnames(x), c("submitter_id", "overallsurvival", "deceased"))
+
+# Step 2: Remove columns that start with "expr_"
+# These columns contain the original expression values saved in earlier steps
+expression_cols <- expression_cols[!startsWith(expression_cols, "expr_")]
+
+# Step 3: Exclude the main gene of interest (stored in 'gene_name')
+# Prevents the primary gene from being included in analyses where it might cause bias
+expression_cols <- expression_cols[expression_cols != gene_name]
+
+# Step 4: Retain columns with more than one unique value
+# Filter columns where the number of unique levels is greater than 1
+# Ensures that only non-constant columns are included
+expression_cols <- expression_cols[sapply(expression_cols, function(col) {
+  length(levels(factor(x[[col]]))) > 1
+})]
+```

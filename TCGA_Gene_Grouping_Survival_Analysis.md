@@ -77,3 +77,32 @@ medians <- sapply(expression_cols, function(col) median(x[[col]], na.rm = TRUE))
    - Calculates the median for each gene expression column using `sapply()`.
 
 ---
+### Purpose of the Code:
+This code categorizes each gene expression column into "High" or "Low" based on its median value. The original numeric expression values are preserved in new columns for reference.
+
+---
+
+### Code with Detailed Comments:
+```r
+# Step 1: Iterate through each gene expression column
+for (col in expression_cols) {
+  
+  # Step 2: Generate a new column name to store the original expression values
+  # Prefixes the original column name with "expr_"
+  # For example, if the column is "ACLY", the new column will be "expr_ACLY"
+  new_col <- paste0("expr_", col)
+  
+  # Step 3: Save the original numeric expression values into the new column
+  # This ensures that the original data is retained for reference or further analysis
+  x[[new_col]] <- x[[col]]
+  
+  # Step 4: Categorize the original expression values into "High" or "Low"
+  # Compare each value in the original column to its corresponding median:
+  # - Assign "High" if the value is greater than or equal to the median
+  # - Assign "Low" if the value is less than the median
+  # Replace the original column with these categorical values
+  x[[col]] <- ifelse(x[[new_col]] >= medians[col], "High", "Low")
+}
+```
+
+---

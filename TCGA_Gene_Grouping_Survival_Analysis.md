@@ -97,3 +97,141 @@ expression_cols <- expression_cols[sapply(expression_cols, function(col) {
   length(levels(factor(x[[col]]))) > 1
 })]
 ```
+---
+This code performs survival analysis and statistical comparisons for each gene in `expression_cols`. It visualizes survival curves, calculates hazard ratios (HR), log-rank test p-values, and other summary statistics, and saves results and plots for each gene comparison.
+
+```r
+# Loop through each gene in the expression columns
+for (gene_col in expression_cols) {
+  
+  # Print the gene being processed
+  cat("\n================Processing Gene: ", gene_col,"==========================\n")
+  
+  # Convert the main gene and the current gene to factors with levels "High" and "Low"
+  x[[gene_name]] <- factor(x[[gene_name]], levels = c("High", "Low"))
+  x[[gene_col]] <- factor(x[[gene_col]], levels = c("High", "Low"))
+  
+  # Create a survival object for analysis
+  surv_obj <- Surv(x$overallsurvival, x$deceased)
+  
+  # Fit a survival model with both genes as stratification variables
+  fit_model <- survfit(surv_obj ~ x[[gene_name]] + x[[gene_col]], data = x)
+  
+  # Check if the model has four strata (all combinations of "High" and "Low")
+  if (length(fit_model$strata) == 4) {
+    
+    # Generate and customize survival plot
+    ggsurv <- ggsurvplot(
+      fit_model,
+      data = x,
+      xlab = "Time (Days)",         # Label for x-axis
+      ylab = "Survival Probability",# Label for y-axis
+      break.time.by = 500,          # Break time intervals by 500 days
+      legend = c(0.85, 0.94),       # Position of legend on the plot
+      legend.title = "",            # No title for legend
+      legend.labs = c(              # Labels for legend with gene combinations
+        paste(gene_name, "=High,", gene_col, "=High"),
+        paste(gene_name, "=High,", gene_col, "=Low"),
+        paste(gene_name, "=Low,", gene_col, "=High"),
+        paste(gene_name, "=Low,", gene_col, "=Low")
+      ),
+      font.x = c(18, "bold"),       # Font style for x-axis label
+      font.y = c(18, "bold"),       # Font style for y-axis label
+      font.legend = c(8, "black"),  # Font style for legend
+      font.tickslab = c(16, "black"), # Font style for tick labels
+      palette = c("red", "darkblue", "green", "violet"), # Custom colors
+      ggtheme = theme_survminer(base_size = 16, font.legend = c(16, "plain", "black"))
+    )
+    # Further adjust plot scales and limits
+    ggsurv$plot <- ggsurv$plot +
+      scale_x_continuous(expand = c(0, 0), limits = c(0, NA)) +
+      scale_y_continuous(expand = c(0, 0), limits = c(0, 1.05)) +
+      coord_cartesian(xlim = c(0, 6700))
+    
+    # Save the survival plot as a PNG file
+    ggsave(filename = paste0(gene_name, "_", gene_col, ".png"), 
+           plot = last_plot(), 
+           device = "png", 
+           width = 7, 
+           height = 5.7)
+    
+    # Print the survival plot
+    print(ggsurv)
+  }
+  
+  # Create a grouping variable with combinations of the two genes
+  x$group <- paste0(gene_name, "=", x[[gene_name]], ", ", gene_col, "=", x[[gene_col]])
+  
+  # Define the levels for the new group column
+  levels(x$group) <- c(
+    paste0(gene_name,"=High, ", gene_col,"=High"),
+    paste0(gene_name,"=High, ", gene_col,"=Low"),
+    paste0(gene_name,"=Low, ", gene_col,"=High"),
+    paste0(gene_name,"=Low, ", gene_col,"=Low")
+  )
+  
+  # Extract unique groups
+  groups <- levels(x$group)
+  
+  # Initialize a data frame to store results
+  results <- data.frame(Group1 = character(),
+                        Group2 = character(),
+                        p_value = numeric(),
+                        stringsAsFactors = FALSE)
+  
+  # Compare each pair of groups using log-rank tests
+  for (i in 1:(length(groups)-1)) {
+    for (j in (i+1):length(groups)) {
+      
+      # Subset data for the two groups being compared
+      group1_data <- subset(x, group == groups[i])
+      group2_data <- subset(x, group == groups[j])
+      
+      # Fit survival models for each group
+      fit_group1 <- survfit(Surv(group1_data$overallsurvival, group1_data$deceased) ~ 1, data = group1_data)
+      fit_group2 <- survfit(Surv(group2_data$overallsurvival, group2_data$deceased) ~ 1, data = group2_data)
+      
+      # Extract median survival, number of observations, and events for each group
+      group1_median <- summary(fit_group1)$table["median"]
+      group2_median <- summary(fit_group2)$table["median"]
+      group1_obs <- summary(fit_group1)$table["records"]
+      group2_obs <- summary(fit_group2)$table["records"]
+      group1_events <- summary(fit_group1)$table["events"]
+      group2_events <- summary(fit_group2)$table["events"]
+      
+      # Combine data for the two groups
+      combined_data <- rbind(group1_data, group2_data)
+      surv_obj_combined <- Surv(combined_data$overallsurvival, combined_data$deceased)
+      
+      # Perform log-rank test
+      logrank_test <- survdiff(surv_obj_combined ~ combined_data$group)
+      p_value <- logrank_test$pvalue
+      
+      # Fit Cox proportional hazards model
+      cox_model_combined <- coxph(surv_obj_combined ~ group, data = combined_data)
+      cox_summary_combined <- summary(cox_model_combined)
+      HR_p_values <- cox_summary_combined$coefficients[, "Pr(>|z|)"]
+      hazard_ratios <- exp(cox_summary_combined$coefficients[, "coef"])
+      
+      # Store the results in the data frame
+      results <- rbind(results, data.frame(Group1 = groups[i],
+                                           Group2 = groups[j],
+                                           G1_obs = group1_obs,
+                                           G2_obs = group2_obs,
+                                           G1_Median = group1_median,
+                                           G2_Median = group2_median,
+                                           G1_Events = group1_events,
+                                           G2_Events = group2_events,
+                                           p_value = round(p_value, 3),
+                                           HR = round(hazard_ratios, 3),
+                                           HR_P_Value = round(HR_p_values, 3)))
+    }
+    # Replace NA values with empty strings in results
+    results[is.na(results)] <- ""
+    
+    # Save the results to a CSV file
+    output_file <- paste0(gene_name, "_", gene_col, ".csv")
+    write.csv(results, file = output_file, row.names = FALSE)
+  }
+}
+```

@@ -5,8 +5,6 @@ This code performs data preparation for survival analysis by:
 3. Identifying gene expression columns for further analysis.
 4. Computing the median expression value for each gene to categorize data in future steps.
 
----
-
 ### Code with Detailed Comments:
 ```r
 # Load the necessary libraries for survival analysis and visualization
@@ -79,8 +77,6 @@ medians <- sapply(expression_cols, function(col) median(x[[col]], na.rm = TRUE))
 ---
 ### Purpose of the Code:
 This code categorizes each gene expression column into "High" or "Low" based on its median value. The original numeric expression values are preserved in new columns for reference.
-
----
 
 ### Code with Detailed Comments:
 ```r

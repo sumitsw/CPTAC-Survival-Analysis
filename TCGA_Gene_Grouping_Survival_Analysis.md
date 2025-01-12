@@ -55,8 +55,6 @@ medians <- sapply(expression_cols, function(col) median(x[[col]], na.rm = TRUE))
 ---
 ### Purpose of the Code:
 This code categorizes each gene expression column into "High" or "Low" based on its median value. The original numeric expression values are preserved in new columns for reference.
-
-### Code with Detailed Comments:
 ```r
 # Step 1: Iterate through each gene expression column
 for (col in expression_cols) {
@@ -82,7 +80,6 @@ for (col in expression_cols) {
 ---
 ### Purpose of the Code:
 This code identifies valid gene expression columns by excluding non-expression columns, ensuring no duplicates or irrelevant columns are included, and retaining only those with more than one unique value.
-### Code with Comments:
 ```r
 # Step 1: Identify potential gene expression columns by excluding specific non-expression columns
 # Exclude "submitter_id", "overallsurvival", and "deceased" as they are not gene expression data

@@ -1,4 +1,3 @@
-### Purpose of the Code:
 This code performs data preparation for survival analysis by:
 1. Loading a CSV file containing survival and gene expression data.
 2. Cleaning and transforming the dataset, including handling missing values and renaming columns.
@@ -53,7 +52,6 @@ expression_cols <- setdiff(colnames(x), c("submitter_id", "overallsurvival", "de
 medians <- sapply(expression_cols, function(col) median(x[[col]], na.rm = TRUE))
 ```
 ---
-### Purpose of the Code:
 This code categorizes each gene expression column into "High" or "Low" based on its median value. The original numeric expression values are preserved in new columns for reference.
 ```r
 # Step 1: Iterate through each gene expression column
@@ -78,7 +76,6 @@ for (col in expression_cols) {
 ```
 
 ---
-### Purpose of the Code:
 This code identifies valid gene expression columns by excluding non-expression columns, ensuring no duplicates or irrelevant columns are included, and retaining only those with more than one unique value.
 ```r
 # Step 1: Identify potential gene expression columns by excluding specific non-expression columns

@@ -23,10 +23,33 @@ expression_cols <- setdiff(colnames(x), c("submitter_id", "overallsurvival", "de
 # Calculate the median for each gene expression column, ignoring NA values
 medians <- sapply(expression_cols, function(col) median(x[[col]], na.rm = TRUE))
 
-# Print the resulting medians for verification
-print(medians)
 ```
+---
+### Explanation of the Code:
+1. **Rename Columns:**
+   - Renames the first three columns for clarity to `submitter_id`, `overallsurvival`, and `deceased`.
 
+2. **Remove Unwanted Columns:**
+   - Deletes a column named `ACLY.1` if it exists in the dataframe.
+
+3. **Handle Missing Survival Data:**
+   - Converts `0` values in the `overallsurvival` column to `NA` since `0` might not be meaningful in survival analysis.
+   - Removes rows where `overallsurvival` is `NA` as they are not useful for analysis.
+
+4. **Remove Columns with Missing Values:**
+   - Eliminates any column that contains `NA` values, ensuring only complete data is retained for further analysis.
+
+5. **Drop Irrelevant Columns:**
+   - Removes the `vital_status` column, which is assumed to be unnecessary for the current analysis.
+
+6. **Identify Gene Expression Columns:**
+   - Determines which columns correspond to gene expression by excluding columns like `submitter_id`, `overallsurvival`, and `deceased`.
+
+7. **Compute Medians:**
+   - Calculates the median for each gene expression column, ignoring any `NA` values to ensure accurate statistics.
+
+8. **Store Results:**
+   - Stores the computed medians in a vector named `medians`.
 ```r
 # Iterate through each gene expression column in the dataframe
 for (col in expression_cols) {
